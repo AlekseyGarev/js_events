@@ -1,6 +1,5 @@
 import './css/style.css';
 import goblinPng from "./img/goblin.png";
-//import hammerImg from "./img/hammer.svg";
 
 class GoblinGame {
     constructor(boardId, size = 16) {
@@ -15,7 +14,6 @@ class GoblinGame {
         this.misses = 0;
         this.intervalId = null;
 
-        // Ссылки на элементы статистики
         this.scoreEl = document.getElementById('score');
         this.missesEl = document.getElementById('misses');
 
@@ -23,7 +21,7 @@ class GoblinGame {
     }
 
     init() {
-        // Очищаем board на случай, если там что-то было
+        
         this.board.innerHTML = '';
         
         for (let i = 0; i < this.size; i++) {
@@ -87,6 +85,6 @@ class GoblinGame {
     }
 }
 
-// Запуск
+
 const game = new GoblinGame('board');
 game.start();
