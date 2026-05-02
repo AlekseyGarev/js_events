@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Goblin Game</title>
 </head>
 <body>
-    <div class="stats">
-        Счет: <span id="score">0</span> | Пропущено: <span id="misses">0</span>/5
+    <div class="stats-container">
+        <div>Счет: <span id="score">0</span></div>
+        <div>Пропущено: <span id="misses">0</span>/5</div>
     </div>
+
     <div id="board"></div>
+
+    <div id="game-over-text" class="game-over-message hidden"></div>
 </body>
 </html>

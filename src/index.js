@@ -1,90 +1,65 @@
 import './css/style.css';
-import goblinPng from "./img/goblin.png";
+import Board from './js/Board';
+import Goblin from './js/Goblin';
+import goblinPng from './img/goblin.png';
 
-class GoblinGame {
-    constructor(boardId, size = 16) {
-        this.board = document.getElementById(boardId);
-        if (!this.board) throw new Error('Игровое поле не найдено!');
-        
-        this.size = size;
-        this.cells = [];
-        this.goblin = null;
-        this.currentIndex = -1;
-        this.score = 0;
-        this.misses = 0;
-        this.intervalId = null;
+const MAX_MISSES = 5;
+let score = 0;
+let misses = 0;
+let gameInterval = null;
+let isHitThisStep = false;
 
-        this.scoreEl = document.getElementById('score');
-        this.missesEl = document.getElementById('misses');
+const board = new Board('board', 16);
+const goblin = new Goblin(goblinPng);
 
-        this.init();
-    }
+const scoreEl = document.getElementById('score');
+const missesEl = document.getElementById('misses');
+const gameOverMessage = document.getElementById('game-over-text');
 
-    init() {
-        
-        this.board.innerHTML = '';
-        
-        for (let i = 0; i < this.size; i++) {
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-            cell.addEventListener('click', () => this.handleHit(i));
-            this.board.append(cell);
-            this.cells.push(cell);
-        }
+function updateUI() {
+    scoreEl.textContent = score;
+    missesEl.textContent = misses;
+}
 
-        this.goblin = document.createElement('img');
-        this.goblin.src = goblinPng;
-        this.goblin.classList.add('character-img');
-    }
-
-    updateUI() {
-        if (this.scoreEl) this.scoreEl.textContent = this.score;
-        if (this.missesEl) this.missesEl.textContent = this.misses;
-    }
-
-    handleHit(index) {
-        if (index === this.currentIndex) {
-            this.score++;
-            this.goblin.remove(); 
-            this.currentIndex = -1; 
-            this.updateUI();
-            console.log(`Попал! Баллы: ${this.score}`);
-        }
-    }
-
-    moveGoblin() {
-        if (this.board.contains(this.goblin)) {
-            this.misses++;
-            this.updateUI();
-            console.log(`Пропуск! Всего: ${this.misses}`);
-        }
-
-        if (this.misses >= 5) {
-            this.stop();
-            setTimeout(() => alert(`Игра окончена! Счет: ${this.score}`), 50);
-            return;
-        }
-
-        let nextIndex;
-        do {
-            nextIndex = Math.floor(Math.random() * this.size);
-        } while (nextIndex === this.currentIndex);
-
-        this.currentIndex = nextIndex;
-        this.cells[this.currentIndex].append(this.goblin);
-    }
-
-    start() {
-        this.moveGoblin();
-        this.intervalId = setInterval(() => this.moveGoblin(), 1000);
-    }
-
-    stop() {
-        clearInterval(this.intervalId);
-        if (this.goblin) this.goblin.remove();
+function stopGame() {
+    clearInterval(gameInterval);
+    if (goblin.element) goblin.element.remove();
+    
+    if (gameOverMessage) {
+        gameOverMessage.textContent = `Игра окончена! Счёт: ${score}`;
+        gameOverMessage.classList.remove('hidden');
     }
 }
 
+function nextStep() {
+    if (document.body.contains(goblin.element) && !isHitThisStep) {
+        misses++;
+        updateUI();
+    }
 
-const game = new GoblinGame('board');
-game.start();
+    if (misses >= MAX_MISSES) {
+        stopGame();
+        return;
+    }
+
+    isHitThisStep = false; 
+    goblin.move(board.cells);
+}
+
+board.generateBoard();
+updateUI();
+
+board.container.addEventListener('mousedown', (event) => {
+    if (event.target.classList.contains('character-img')) {
+        score++;
+        isHitThisStep = true;
+        
+        event.target.remove(); 
+        
+        updateUI();
+        
+        event.stopPropagation();
+    }
+});
+
+gameInterval = setInterval(nextStep, 1000);
